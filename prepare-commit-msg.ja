@@ -1,0 +1,120 @@
+#!/bin/bash
+#
+# https://github.com/negokaz/git-fancy-message-prefix
+#
+
+function templates {
+# format:
+#
+#   prefix:   emoji(code)   description
+#
+# Full Emoji List: https://unicode.org/emoji/charts/full-emoji-list.html
+cat <<EOF
+feat:     \U2728    新機能追加
+fix:      \U1f41e   バグ修正
+doc:      \U1f4da   ドキュメントのみの変更
+style:    \U1f484   プログラムの動きに影響を与えない変更\n(インデントの調整やフォーマッタにかけた場合など)
+refactor: \U1f528   バグ修正や新機能追加以外のコード修正
+pref:     \U1f680   パフォーマンス改善のためのコード修正
+test:     \U1f6a8   テストの追加や既存テストの修正
+chore:    \U1f477   ビルドプロセスやドキュメント生成のような補助ツールやライブラリの変更
+merge:    \U1f500
+EOF
+# "merge:" is a special prefix to create merge commit message.
+}
+
+readonly overview_title="概要 (下記テンプレートを1つ選択してコメントを外してください)"
+readonly  details_title="詳細"
+
+
+readonly COMMIT_MSG_FILE=$1 COMMIT_SOURCE=$2 SHA1=$3
+
+function main {
+  case "${COMMIT_SOURCE}" in
+    message) # use -m/-F
+      local prefix="$(extract_prefix "${COMMIT_MSG_FILE}")"
+      add_emoji "${prefix}" "${COMMIT_MSG_FILE}"
+    ;;
+    template) # use template (ex: -t option)
+      : # do nothing
+    ;;
+    merge) # merge commit
+      add_emoji ":merge" "${COMMIT_MSG_FILE}"
+    ;;
+    squash) # squash commits in a branch with --squash
+      : # do nothing
+    ;;
+    commit) # use -c/-C/--amend
+      : # do nothing
+    ;;
+    *) # no option
+      create_full_template "${COMMIT_MSG_FILE}"
+    ;;
+  esac
+}
+
+function create_full_template {
+  local message_file="$1"
+  local msg_temp_file="$(mktemp)"
+  {
+    echo "# ${overview_title}"
+    print_templates
+    echo ""
+    echo "# ${details_title}"
+    echo ""
+    cat "${message_file}"
+  } > "${msg_temp_file}"
+
+  cat "${msg_temp_file}" > "${message_file}"
+  rm  "${msg_temp_file}"
+}
+
+function print_templates {
+  templates | grep -v '^merge:' | sed -e 's/\\/\\\\/g' \
+    | while read prefix emoji description
+      do
+        echo "#$(emoji_char "${emoji}")${prefix} "
+        echo -e "${description}" | awk '
+          NR == 1 {
+            print "#  └ " $0
+          }
+          NR != 1 {
+            print "#    " $0
+          }
+        '
+      done
+}
+
+function add_emoji {
+  local prefix="$1"
+  local message_file="$2"
+
+  local template=$(templates | grep "^\s*${prefix}")
+  local emoji=$(emoji_of "${template}")
+
+  local msg_temp_file="$(mktemp)"
+  
+  echo "${emoji}$(cat ${message_file})" > "${msg_temp_file}"
+  cat "${msg_temp_file}" > "${message_file}"
+  rm  "${msg_temp_file}"
+}
+
+function decode_emoji {
+  perl -CO -pE 's/\\u(\p{Hex}+)/chr(hex($1))/xieg'
+}
+
+function emoji_char {
+  echo "$1" | decode_emoji
+}
+
+function emoji_of {
+  local template="$1"
+  echo "${template}" | awk '{ print $2 }' | decode_emoji
+}
+
+function extract_prefix {
+  local file="$1"
+  cat "${file}" | awk '{ print $1 }'
+}
+
+main
