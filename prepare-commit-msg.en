@@ -45,7 +45,11 @@ function main {
             : # do nothing
             ;;
         commit) # use -c/-C/--amend
-            : # do nothing
+            if is_interactive "${COMMIT_MSG_FILE}"
+            then
+                local prefix="$(extract_prefix_without_emoji "${COMMIT_MSG_FILE}")"
+                apply_template "${prefix}" "${COMMIT_MSG_FILE}"
+            fi
             ;;
         *) # no option
             create_full_template "${COMMIT_MSG_FILE}"
@@ -69,11 +73,43 @@ function create_full_template {
     rm  "${msg_temp_file}"
 }
 
+function apply_template {
+    local prefix="$1" message_file="$2"
+    local msg_temp_file="$(mktemp)"
+    local template=$(select_template "${prefix}")
+    {
+        if [[ -z "${template}" ]]
+        then
+            # invalid prefix
+            extract_title "${message_file}"
+            print_templates
+        else
+            # valid prefix
+            local title="$(extract_title_without_prefix "${message_file}")"
+            print_templates "${prefix}" "${title}"
+        fi
+        echo
+        echo "# ${details_title}"
+        echo
+        extract_details "${message_file}"
+    } > "${msg_temp_file}"
+
+    cat "${msg_temp_file}" > "${message_file}"
+    rm  "${msg_temp_file}"
+}
+
 function print_templates {
+    local apply_prefix="$1" apply_title="$2"
+
     templates | grep -v '^merge:' | sed -e 's/\\/\\\\/g' \
         | while read prefix emoji description
         do
-            echo "#$(emoji_char "${emoji}")${prefix} "
+            if [[ "${apply_prefix}" = "${prefix}" ]]
+            then
+                echo "$(emoji_char "${emoji}")${prefix}${apply_title}"
+            else
+                echo "#$(emoji_char "${emoji}")${prefix} "
+            fi
             echo -e "${description}" | awk '
                 NR == 1 {
                     print "#  └ " $0
@@ -89,7 +125,7 @@ function add_emoji {
     local prefix="$1"
     local message_file="$2"
 
-    local template=$(templates | awk -v prefix="${prefix}" '$1 == prefix')
+    local template=$(select_template "${prefix}")
     local emoji=$(emoji_of "${template}")
 
     local msg_temp_file="$(mktemp)"
@@ -97,6 +133,10 @@ function add_emoji {
     echo "${emoji}$(cat ${message_file})" > "${msg_temp_file}"
     cat "${msg_temp_file}" > "${message_file}"
     rm  "${msg_temp_file}"
+}
+
+function select_template {
+    templates | awk -v prefix="$1" '$1 == prefix'
 }
 
 function decode_emoji {
@@ -112,9 +152,35 @@ function emoji_of {
     echo "${template}" | awk '{ print $2 }' | decode_emoji
 }
 
+function is_interactive {
+    local message_file="$1"
+    # If it is interactive mode, it may contain comment lines ('^#')
+    grep -E '^#' "${message_file}" &> /dev/null
+}
+
 function extract_prefix {
     local file="$1"
-    cat "${file}" | awk '{ print $1 }'
+    extract_title "${file}" | awk '{ print $1 }'
+}
+
+function extract_prefix_without_emoji {
+    local file="$1"
+    extract_prefix "${file}" | sed -E 's/[^a-zA-Z0-9:]//g'
+}
+
+function extract_title {
+    local file="$1"
+    cat "${file}" | head -n 1
+}
+
+function extract_title_without_prefix {
+    local file="$1"
+    extract_title "${file}" | awk '{ $1 = ""; print }'
+}
+
+function extract_details {
+    local file="$1"
+    cat "${file}" | tail -n +3
 }
 
 main
