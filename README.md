@@ -9,13 +9,13 @@ Inspired by:
 
 ## Feature
 
-### Commit message template
-
-![](docs/img/commit-template.gif)
-
 ### Add an emoji to prefix of commit message automatically
 
 ![](docs/img/commit-with-message.gif)
+
+### Commit message template
+
+![](docs/img/commit-template.gif)
 
 ## Install
 
