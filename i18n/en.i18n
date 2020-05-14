@@ -1,0 +1,30 @@
+{{A new feature}}
+A new feature
+
+{{A bug fix}}
+A bug fix
+
+{{Documentation only changes}}
+Documentation only changes
+
+{{Changes that do not affect the meaning of the code\n(white-space, formatting, missing semi-colons, etc)}}
+Changes that do not affect the meaning of the code\n(white-space, formatting, missing semi-colons, etc)
+
+{{A code change that neither fixes a bug nor adds a featur}}
+A code change that neither fixes a bug nor adds a featur
+
+{{A code change that improves performance}}
+A code change that improves performance
+
+{{Adding missing or correcting existing tests}}
+Adding missing or correcting existing tests
+
+{{Changes to the build process or auxiliary tools and libraries\nsuch as documentation generation}}
+Changes to the build process or auxiliary tools and libraries\nsuch as documentation generation
+
+{{Overview (Uncomment one of the following templates)}}
+Overview (Uncomment one of the following templates)
+
+{{Details}}
+Details
+

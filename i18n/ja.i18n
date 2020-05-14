@@ -1,0 +1,30 @@
+{{A new feature}}
+新機能追加
+
+{{A bug fix}}
+バグ修正
+
+{{Documentation only changes}}
+ドキュメントのみの変更
+
+{{Changes that do not affect the meaning of the code\n(white-space, formatting, missing semi-colons, etc)}}
+プログラムの動きに影響を与えない変更\n(インデントの調整やフォーマッタにかけた場合など)
+
+{{A code change that neither fixes a bug nor adds a featur}}
+バグ修正や新機能追加以外のコード修正
+
+{{A code change that improves performance}}
+パフォーマンス改善のためのコード修正
+
+{{Adding missing or correcting existing tests}}
+テストの追加や既存テストの修正
+
+{{Changes to the build process or auxiliary tools and libraries\nsuch as documentation generation}}
+ビルドプロセスやドキュメント生成のような補助ツールやライブラリの変更
+
+{{Overview (Uncomment one of the following templates)}}
+概要 (下記テンプレートを1つ選択してコメントを外してください)
+
+{{Details}}
+詳細
+

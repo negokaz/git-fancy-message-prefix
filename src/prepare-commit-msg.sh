@@ -10,21 +10,21 @@ function templates {
 #
 # Full Emoji List: https://unicode.org/emoji/charts/full-emoji-list.html
 cat <<EOF
-feat:     \U2728    A new feature
-fix:      \U1f41e   A bug fix
-doc:      \U1f4da   Documentation only changes
-style:    \U1f484   Changes that do not affect the meaning of the code\n(white-space, formatting, missing semi-colons, etc)
-refactor: \U1f528   A code change that neither fixes a bug nor adds a featur
-perf:     \U1f680   A code change that improves performance
-test:     \U1f6a8   Adding missing or correcting existing tests
-chore:    \U1f477   Changes to the build process or auxiliary tools and libraries\nsuch as documentation generation
+feat:     \U2728    {{A new feature}}
+fix:      \U1f41e   {{A bug fix}}
+doc:      \U1f4da   {{Documentation only changes}}
+style:    \U1f484   {{Changes that do not affect the meaning of the code\n(white-space, formatting, missing semi-colons, etc)}}
+refactor: \U1f528   {{A code change that neither fixes a bug nor adds a featur}}
+perf:     \U1f680   {{A code change that improves performance}}
+test:     \U1f6a8   {{Adding missing or correcting existing tests}}
+chore:    \U1f477   {{Changes to the build process or auxiliary tools and libraries\nsuch as documentation generation}}
 merge:    \U1f500
 EOF
 # "merge:" is a special prefix to create merge commit message.
 }
 
-readonly overview_title="Overview (Uncomment one of the following templates)"
-readonly  details_title="Details"
+readonly overview_title="{{Overview (Uncomment one of the following templates)}}"
+readonly  details_title="{{Details}}"
 
 
 readonly COMMIT_MSG_FILE=$1 COMMIT_SOURCE=$2 SHA1=$3
