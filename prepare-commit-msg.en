@@ -41,7 +41,7 @@ function main {
             ;;
         merge) # merge commit
             local commit_message="$(cat "${COMMIT_MSG_FILE}")"
-            add_emoji ":merge" "${commit_message}" > "${COMMIT_MSG_FILE}"
+            add_emoji "merge:" "${commit_message}" > "${COMMIT_MSG_FILE}"
             ;;
         squash) # squash commits in a branch with --squash
             : # do nothing
