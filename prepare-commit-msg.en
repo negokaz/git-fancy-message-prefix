@@ -98,20 +98,27 @@ function print_templates {
     templates | grep -v '^merge:' | sed -e 's/\\/\\\\/g' \
         | while read prefix emoji description
         do
+            local desc_comment="$(
+                echo -e "${description}" | awk '
+                    NR == 1 {
+                        print "#  └ " $0
+                    }
+                    NR != 1 {
+                        print "#    " $0
+                    }
+                '
+            )"
             if [[ "${apply_prefix}" = "${prefix}" ]]
             then
+                echo '#=================================================='
                 echo "$(emoji_char "${emoji}")${prefix}${apply_title}"
+                echo "${desc_comment}"
+                echo '#=================================================='
             else
                 echo "#$(emoji_char "${emoji}")${prefix} "
+                echo "${desc_comment}"
             fi
-            echo -e "${description}" | awk '
-                NR == 1 {
-                    print "#  └ " $0
-                }
-                NR != 1 {
-                    print "#    " $0
-                }
-            '
+            
         done
 }
 
