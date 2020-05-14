@@ -21,14 +21,18 @@ Inspired by:
 
 Run following command in your git working directory
 
-**bash**
+### bash/zsh/fish
+
+**English version**
+
 ```bash
 curl https://raw.githubusercontent.com/negokaz/git-fancy-message-prefix/master/prepare-commit-msg.en -o .git/hooks/prepare-commit-msg && chmod +x .git/hooks/prepare-commit-msg
 ```
 
-**fish**
-```fish
-curl https://raw.githubusercontent.com/negokaz/git-fancy-message-prefix/master/prepare-commit-msg.en -o .git/hooks/prepare-commit-msg; and chmod +x .git/hooks/prepare-commit-msg
+**Japanese version**
+
+```bash
+curl https://raw.githubusercontent.com/negokaz/git-fancy-message-prefix/master/prepare-commit-msg.ja -o .git/hooks/prepare-commit-msg && chmod +x .git/hooks/prepare-commit-msg
 ```
 
 ## Customize
