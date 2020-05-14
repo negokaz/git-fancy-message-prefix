@@ -50,8 +50,7 @@ function main {
             local commit_message="$(cat "${COMMIT_MSG_FILE}")"
             if is_interactive "${commit_message}"
             then
-                local prefix="$(extract_prefix_without_emoji "${commit_message}")"
-                apply_template "${prefix}" "${commit_message}" > "${COMMIT_MSG_FILE}"
+                apply_template "${commit_message}" > "${COMMIT_MSG_FILE}"
             fi
             ;;
         *) # no option
@@ -73,8 +72,9 @@ function create_full_template {
 }
 
 function apply_template {
-    local prefix="$1" commit_message="$2"
+    local commit_message="$1"
 
+    local prefix="$(extract_prefix_without_emoji "${commit_message}")"
     local template=$(select_template "${prefix}")
     if [[ -z "${template}" ]]
     then
