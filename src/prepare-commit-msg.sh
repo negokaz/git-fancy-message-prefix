@@ -89,7 +89,7 @@ function add_emoji {
     local prefix="$1"
     local message_file="$2"
 
-    local template=$(templates | grep "^\s*${prefix}")
+    local template=$(templates | awk -v prefix="${prefix}" '$1 == prefix')
     local emoji=$(emoji_of "${template}")
 
     local msg_temp_file="$(mktemp)"
