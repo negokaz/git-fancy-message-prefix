@@ -32,70 +32,64 @@ readonly COMMIT_MSG_FILE=$1 COMMIT_SOURCE=$2 SHA1=$3
 function main {
     case "${COMMIT_SOURCE}" in
         message) # use -m/-F
-            local prefix="$(extract_prefix "${COMMIT_MSG_FILE}")"
-            add_emoji "${prefix}" "${COMMIT_MSG_FILE}"
+            local commit_message="$(cat "${COMMIT_MSG_FILE}")"
+            local prefix="$(extract_prefix "${commit_message}")"
+            add_emoji "${prefix}" "${commit_message}" > "${COMMIT_MSG_FILE}"
             ;;
         template) # use template (ex: -t option)
             : # do nothing
             ;;
         merge) # merge commit
-            add_emoji ":merge" "${COMMIT_MSG_FILE}"
+            local commit_message="$(cat "${COMMIT_MSG_FILE}")"
+            add_emoji ":merge" "${commit_message}" > "${COMMIT_MSG_FILE}"
             ;;
         squash) # squash commits in a branch with --squash
             : # do nothing
             ;;
         commit) # use -c/-C/--amend
-            if is_interactive "${COMMIT_MSG_FILE}"
+            local commit_message="$(cat "${COMMIT_MSG_FILE}")"
+            if is_interactive "${commit_message}"
             then
-                local prefix="$(extract_prefix_without_emoji "${COMMIT_MSG_FILE}")"
-                apply_template "${prefix}" "${COMMIT_MSG_FILE}"
+                local prefix="$(extract_prefix_without_emoji "${commit_message}")"
+                apply_template "${prefix}" "${commit_message}" > "${COMMIT_MSG_FILE}"
             fi
             ;;
         *) # no option
-            create_full_template "${COMMIT_MSG_FILE}"
+            local commit_message="$(cat "${COMMIT_MSG_FILE}")"
+            create_full_template "${commit_message}" > "${COMMIT_MSG_FILE}"
             ;;
     esac
 }
 
 function create_full_template {
-    local message_file="$1"
-    local msg_temp_file="$(mktemp)"
-    {
-        echo "# ${overview_title}"
-        print_templates
-        echo ""
-        echo "# ${details_title}"
-        echo ""
-        cat "${message_file}"
-    } > "${msg_temp_file}"
+    local commit_message="$1"
 
-    cat "${msg_temp_file}" > "${message_file}"
-    rm  "${msg_temp_file}"
+    echo "# ${overview_title}"
+    print_templates
+    echo ""
+    echo "# ${details_title}"
+    echo ""
+    echo "${commit_message}"
 }
 
 function apply_template {
-    local prefix="$1" message_file="$2"
-    local msg_temp_file="$(mktemp)"
-    local template=$(select_template "${prefix}")
-    {
-        if [[ -z "${template}" ]]
-        then
-            # invalid prefix
-            extract_title "${message_file}"
-            print_templates
-        else
-            # valid prefix
-            local title="$(extract_title_without_prefix "${message_file}")"
-            print_templates "${prefix}" "${title}"
-        fi
-        echo
-        echo "# ${details_title}"
-        echo
-        extract_details "${message_file}"
-    } > "${msg_temp_file}"
+    local prefix="$1" commit_message="$2"
 
-    cat "${msg_temp_file}" > "${message_file}"
-    rm  "${msg_temp_file}"
+    local template=$(select_template "${prefix}")
+    if [[ -z "${template}" ]]
+    then
+        # invalid prefix
+        extract_title "${commit_message}"
+        print_templates
+    else
+        # valid prefix
+        local title="$(extract_title_without_prefix "${commit_message}")"
+        print_templates "${prefix}" "${title}"
+    fi
+    echo
+    echo "# ${details_title}"
+    echo
+    extract_details "${commit_message}"
 }
 
 function print_templates {
@@ -122,17 +116,12 @@ function print_templates {
 }
 
 function add_emoji {
-    local prefix="$1"
-    local message_file="$2"
+    local prefix="$1" commit_message="$2"
 
     local template=$(select_template "${prefix}")
     local emoji=$(emoji_of "${template}")
-
-    local msg_temp_file="$(mktemp)"
     
-    echo "${emoji}$(cat ${message_file})" > "${msg_temp_file}"
-    cat "${msg_temp_file}" > "${message_file}"
-    rm  "${msg_temp_file}"
+    echo "${emoji}${commit_message}"
 }
 
 function select_template {
@@ -153,34 +142,34 @@ function emoji_of {
 }
 
 function is_interactive {
-    local message_file="$1"
+    local commit_message="$1"
     # If it is interactive mode, it may contain comment lines ('^#')
-    grep -E '^#' "${message_file}" &> /dev/null
+    echo "${commit_message}" | grep -E '^#' &> /dev/null
 }
 
 function extract_prefix {
-    local file="$1"
-    extract_title "${file}" | awk '{ print $1 }'
+    local commit_message="$1"
+    extract_title "${commit_message}" | awk '{ print $1 }'
 }
 
 function extract_prefix_without_emoji {
-    local file="$1"
-    extract_prefix "${file}" | sed -E 's/[^a-zA-Z0-9:]//g'
+    local commit_message="$1"
+    extract_prefix "${commit_message}" | sed -E 's/[^a-zA-Z0-9:]//g'
 }
 
 function extract_title {
-    local file="$1"
-    cat "${file}" | head -n 1
+    local commit_message="$1"
+    echo "${commit_message}" | head -n 1
 }
 
 function extract_title_without_prefix {
-    local file="$1"
-    extract_title "${file}" | awk '{ $1 = ""; print }'
+    local commit_message="$1"
+    extract_title "${commit_message}" | awk '{ $1 = ""; print }'
 }
 
 function extract_details {
-    local file="$1"
-    cat "${file}" | tail -n +3
+    local commit_message="$1"
+    echo "${commit_message}" | tail -n +3
 }
 
 main
